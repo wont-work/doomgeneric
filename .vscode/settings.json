@@ -1,0 +1,10 @@
+{
+    "files.associations": {
+        "lua.h": "c",
+        "doomgeneric.h": "c",
+        "doomkeys.h": "c",
+        "stdint.h": "c",
+        "m_config.h": "c",
+        "m_argv.h": "c"
+    }
+}
