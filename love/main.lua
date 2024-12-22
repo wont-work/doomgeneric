@@ -1,14 +1,14 @@
 local doom = require 'doom'
 
-local canvas;
-
 local band = bit.band;
 local rshift = bit.rshift;
+
 local w = doom.get_width()
 local h = doom.get_height()
+local canvas = love.image.newImageData(w + 1, h + 1, "rgba8")
+local image = love.graphics.newImage(canvas)
 
 function love.load()
-    canvas = love.image.newImageData(w + 1, h + 1, "rgba8")
     doom.start()
 end
 
@@ -25,8 +25,7 @@ function love.draw()
         end
     end
 
-    love.graphics.clear()
-    local image = love.graphics.newImage(canvas)
+    image:replacePixels(canvas)
     love.graphics.draw(image, 0, 0)
 end
 

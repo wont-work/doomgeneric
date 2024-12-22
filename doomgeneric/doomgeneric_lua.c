@@ -14,6 +14,7 @@
 
 uint32_t begin;
 bool want_redraw = false;
+bool initialized = false;
 
 #define KEYQUEUE_SIZE 16
 static unsigned short s_KeyQueue[KEYQUEUE_SIZE];
@@ -24,18 +25,30 @@ static unsigned int s_KeyQueueReadIndex = 0;
 
 unsigned char lua_to_doom_key(const char *key)
 {
-    if (strcmp(key, "right") == 0) return KEY_RIGHTARROW;
-    if (strcmp(key, "left") == 0) return KEY_LEFTARROW;
-    if (strcmp(key, "up") == 0) return KEY_UPARROW;
-    if (strcmp(key, "down") == 0) return KEY_DOWNARROW;
-    if (strcmp(key, "a") == 0) return KEY_STRAFE_L;
-    if (strcmp(key, "d") == 0) return KEY_STRAFE_R;
-    if (strcmp(key, "e") == 0) return KEY_USE;
-    if (strcmp(key, "space") == 0) return KEY_FIRE;
-    if (strcmp(key, "return") == 0) return KEY_ENTER;
-    if (strcmp(key, "escape") == 0) return KEY_ESCAPE;
-    if (strcmp(key, "tab") == 0) return KEY_TAB;
-    if (strcmp(key, "lshift") == 0) return KEY_RSHIFT;
+    if (strcmp(key, "right") == 0)
+        return KEY_RIGHTARROW;
+    if (strcmp(key, "left") == 0)
+        return KEY_LEFTARROW;
+    if (strcmp(key, "up") == 0)
+        return KEY_UPARROW;
+    if (strcmp(key, "down") == 0)
+        return KEY_DOWNARROW;
+    if (strcmp(key, "a") == 0)
+        return KEY_STRAFE_L;
+    if (strcmp(key, "d") == 0)
+        return KEY_STRAFE_R;
+    if (strcmp(key, "e") == 0)
+        return KEY_USE;
+    if (strcmp(key, "space") == 0)
+        return KEY_FIRE;
+    if (strcmp(key, "return") == 0)
+        return KEY_ENTER;
+    if (strcmp(key, "escape") == 0)
+        return KEY_ESCAPE;
+    if (strcmp(key, "tab") == 0)
+        return KEY_TAB;
+    if (strcmp(key, "lshift") == 0)
+        return KEY_RSHIFT;
 
     printf("unhandled key: %s\n", key);
     return 0xff;
@@ -44,7 +57,8 @@ unsigned char lua_to_doom_key(const char *key)
 void add_key(int pressed, const char *luaKey)
 {
     unsigned char key = lua_to_doom_key(luaKey);
-    if (key == 0xff) return;
+    if (key == 0xff)
+        return;
 
     s_KeyQueue[s_KeyQueueWriteIndex] = (pressed << 8) | key;
     s_KeyQueueWriteIndex++;
@@ -131,6 +145,10 @@ void DG_SetWindowTitle(const char *title) {}
 
 LUALIB_API int doom_start(lua_State *L)
 {
+    if (initialized)
+        return 1;
+    initialized = true;
+
     char *argv[] = {};
     doomgeneric_Create(0, argv);
     return 1;
