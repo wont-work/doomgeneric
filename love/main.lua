@@ -4,15 +4,10 @@ local canvas;
 
 local band = bit.band;
 local rshift = bit.rshift;
-
-local w, h;
+local w = doom.get_width()
+local h = doom.get_height()
 
 function love.load()
-    w = doom.get_width()
-    h = doom.get_height()
-
-    print("resolution",w,h)
-
     canvas = love.image.newImageData(w + 1, h + 1, "rgba8")
     doom.start()
 end
@@ -26,7 +21,6 @@ function love.draw()
             local b = band(bgra, 0xff) / 255
             local g = band(rshift(bgra, 8), 0xff) / 255
             local r = band(rshift(bgra, 16), 0xff) / 255
-            --local a = rshift(bgra, 24) / 255
             canvas:setPixel(x, y, r, g, b, 1)
         end
     end
@@ -38,4 +32,12 @@ end
 
 function love.update(dt)
     doom.tick()
+end
+
+function love.keypressed(key, scancode, isrepeat)
+    doom.press_key(key)
+end
+
+function love.keyreleased(key)
+    doom.release_key(key)
 end
