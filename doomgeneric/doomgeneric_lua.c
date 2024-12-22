@@ -68,7 +68,7 @@ void add_key(int pressed, const char *luaKey)
 uint32_t get_ms()
 {
     struct timespec spec;
-    clock_gettime(CLOCK_MONOTONIC_RAW, &spec);
+    clock_gettime(CLOCK_MONOTONIC, &spec);
     return ((spec.tv_sec * 1000) + (spec.tv_nsec / 1000000));
 }
 
@@ -218,6 +218,7 @@ static const luaL_Reg doomlib[] = {
 
 LUALIB_API int luaopen_doom(lua_State *L)
 {
+    printf("Registering native doom module\n");
     luaL_register(L, "doom", doomlib);
     return 1;
 }

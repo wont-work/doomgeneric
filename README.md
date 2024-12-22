@@ -1,3 +1,14 @@
+# local doom = require "doom"
+
+a lua native module for doomgeneric, allowing doom to be embedded inside games written in lua and can load native libraries (say, ones using love2d)
+
+example code on the love/ directory. bring your own doom1.wad
+
+requires luajit to compile because im lazy. theres a separate Makefile.mingw for windows cross compilation with the arch linux `mingw-w64-luajit` package.  
+compiling with regular lua should just be a matter of installing lua 5.1 and replacing the include definitions on doomgeneric_lua.c
+
+original doomgeneric readme follows:
+
 # doomgeneric
 The purpose of doomgeneric is to make porting Doom easier.
 Of course Doom is already portable but with doomgeneric it is possible with just a few functions.
