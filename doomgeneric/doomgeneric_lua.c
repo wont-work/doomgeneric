@@ -149,8 +149,10 @@ LUALIB_API int doom_start(lua_State *L)
         return 1;
     initialized = true;
 
-    char *argv[] = {};
-    doomgeneric_Create(0, argv);
+    const char *iwad = lua_tostring(L, 1);
+    char *argv[] = {"", "-iwad\0", iwad};
+
+    doomgeneric_Create(3, argv);
     return 1;
 }
 

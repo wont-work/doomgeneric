@@ -13,9 +13,8 @@ endif
 
 
 CC=gcc
-CFLAGS+=-ggdb3 -Os
 LDFLAGS+=-Wl,--gc-sections
-CFLAGS+=-ggdb3 -Wall -DNORMALUNIX -DLINUX -DSNDSERV -D_DEFAULT_SOURCE -shared -fPIC
+CFLAGS+=-O2 -Wall -shared -fPIC
 LIBS+=-lm -lc -llua
 
 # subdirectory for objects

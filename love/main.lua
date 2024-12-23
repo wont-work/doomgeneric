@@ -13,7 +13,7 @@ function love.load()
     local _, _, w, h = love.window.getSafeArea()
     love.resize(w, h)
 
-    doom.start()
+    doom.start("doom1.wad")
 end
 
 function love.draw()
