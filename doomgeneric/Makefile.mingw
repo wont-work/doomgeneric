@@ -14,7 +14,7 @@ endif
 
 CC=x86_64-w64-mingw32-gcc
 LDFLAGS+=-Wl,--gc-sections
-CFLAGS+=-O2 -Wall -DNORMALUNIX -DLINUX -DSNDSERV -D_DEFAULT_SOURCE -shared -fPIC
+CFLAGS+=-O2 -Wall -D_WIN32 -shared -fPIC
 LIBS+=-lm -lluajit
 
 # subdirectory for objects

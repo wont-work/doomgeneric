@@ -756,7 +756,11 @@ int	R_CheckTextureNumForName (char *name)
     
     while (texture != NULL)
     {
+        #ifdef _WIN32
+	if (!strncmp (texture->name, name, 8) )
+        #else
 	if (!strncasecmp (texture->name, name, 8) )
+        #endif
 	    return texture->index;
 
         texture = texture->next;
