@@ -1,9 +1,9 @@
-#define _POSIX_C_SOURCE 200809L
 #include <math.h>
 #include <errno.h>
-#include <time.h>
 #include <stdbool.h>
 #include <string.h>
+#include <sys/time.h>
+#include <unistd.h>
 
 #include "doomgeneric.h"
 #include "doomkeys.h"
@@ -67,31 +67,10 @@ void add_key(int pressed, const char *luaKey)
 
 uint32_t get_ms()
 {
-    struct timespec spec;
-    clock_gettime(CLOCK_MONOTONIC, &spec);
-    return ((spec.tv_sec * 1000) + (spec.tv_nsec / 1000000));
-}
+    struct timeval tv;
+    gettimeofday(&tv, NULL);
 
-int msleep(long msec)
-{
-    struct timespec ts;
-    int res;
-
-    if (msec < 0)
-    {
-        errno = EINVAL;
-        return -1;
-    }
-
-    ts.tv_sec = msec / 1000;
-    ts.tv_nsec = (msec % 1000) * 1000000;
-
-    do
-    {
-        res = nanosleep(&ts, &ts);
-    } while (res && errno == EINTR);
-
-    return res;
+    return (tv.tv_sec) * 1000 + (tv.tv_usec) / 1000; // convert tv_sec & tv_usec to millisecond
 }
 
 //
@@ -108,7 +87,7 @@ void DG_DrawFrame()
 
 void DG_SleepMs(uint32_t ms)
 {
-    msleep(ms);
+    usleep(ms * 1000);
 }
 
 uint32_t DG_GetTicksMs()

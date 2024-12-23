@@ -14,8 +14,8 @@ endif
 
 CC=x86_64-w64-mingw32-gcc
 LDFLAGS+=-Wl,--gc-sections
-CFLAGS+=-O2 -Wall -D_WIN32 -shared -fPIC
-LIBS+=-lm -lluajit-2.1
+CFLAGS+=-O2 -Wall -D_WIN32 -shared -fPIC -no-pthread
+LIBS+=-lluajit-2.1
 
 # subdirectory for objects
 OBJDIR=build-mingw
