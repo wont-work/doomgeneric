@@ -66,7 +66,7 @@ unsigned char lua_to_doom_key(const char *key)
     return 0xff;
 }
 
-void add_key(int pressed, const char *luaKey)
+static void add_key(int pressed, const char *luaKey)
 {
     unsigned char key = lua_to_doom_key(luaKey);
     if (key == 0xff)
@@ -77,7 +77,7 @@ void add_key(int pressed, const char *luaKey)
     s_KeyQueueWriteIndex %= KEYQUEUE_SIZE;
 }
 
-uint32_t get_ms()
+static uint32_t get_ms()
 {
 #ifdef _WIN32
     SYSTEMTIME tv;
@@ -88,7 +88,7 @@ uint32_t get_ms()
     struct timeval tv;
     gettimeofday(&tv, NULL);
 
-    return (tv.tv_sec) * 1000 + (tv.tv_usec) / 1000; // convert tv_sec & tv_usec to millisecond
+    return (tv.tv_sec) * 1000 + (tv.tv_usec) / 1000;
 #endif
 }
 
@@ -156,13 +156,13 @@ LUALIB_API int doom_start(lua_State *L)
     char *argv[] = {"", "-iwad\0", iwad};
 
     doomgeneric_Create(3, argv);
-    return 1;
+    return 0;
 }
 
 LUALIB_API int doom_tick(lua_State *L)
 {
     doomgeneric_Tick();
-    return 1;
+    return 0;
 }
 
 LUALIB_API int doom_get_width(lua_State *L)
@@ -182,8 +182,15 @@ LUALIB_API int doom_get_pixel_at(lua_State *L)
     int x = lua_tonumber(L, 1);
     int y = lua_tonumber(L, 2);
 
-    lua_pushnumber(L, DG_ScreenBuffer[(y * DOOMGENERIC_RESX) + x]);
-    return 1;
+    pixel_t packed = DG_ScreenBuffer[(y * DOOMGENERIC_RESX) + x];
+    lua_Number b = ( packed        & 0xff) / 255.0;
+    lua_Number g = ((packed >> 8)  & 0xff) / 255.0;
+    lua_Number r = ((packed >> 16) & 0xff) / 255.0;
+
+    lua_pushnumber(L, r);
+    lua_pushnumber(L, g);
+    lua_pushnumber(L, b);
+    return 3;
 }
 
 LUALIB_API int doom_get_want_redraw(lua_State *L)
@@ -191,6 +198,7 @@ LUALIB_API int doom_get_want_redraw(lua_State *L)
     lua_pushboolean(L, want_redraw);
     if (want_redraw)
         want_redraw = false;
+
     return 1;
 }
 
@@ -199,7 +207,7 @@ LUALIB_API int doom_press_key(lua_State *L)
     const char *key = lua_tostring(L, 1);
     add_key(1, key);
 
-    return 1;
+    return 0;
 }
 
 LUALIB_API int doom_release_key(lua_State *L)
@@ -207,7 +215,7 @@ LUALIB_API int doom_release_key(lua_State *L)
     const char *key = lua_tostring(L, 1);
     add_key(0, key);
 
-    return 1;
+    return 0;
 }
 
 static const luaL_Reg doomlib[] = {
@@ -225,5 +233,6 @@ LUALIB_API int luaopen_doom(lua_State *L)
 {
     printf("Registering native doom module\n");
     luaL_register(L, "doom", doomlib);
-    return 1;
+
+    return 0;
 }
