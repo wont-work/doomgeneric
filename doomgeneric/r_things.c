@@ -208,11 +208,7 @@ void R_InitSpriteDefs (char** namelist)
 	//  filling in the frames for whatever is found
 	for (l=start+1 ; l<end ; l++)
 	{
-        #ifdef _WIN32
-	    if (!strncmp(lumpinfo[l].name, spritename, 4))
-        #else 
 	    if (!strncasecmp(lumpinfo[l].name, spritename, 4))
-        #endif
 	    {
 		frame = lumpinfo[l].name[4] - 'A';
 		rotation = lumpinfo[l].name[5] - '0';
