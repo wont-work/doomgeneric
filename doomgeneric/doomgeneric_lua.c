@@ -146,6 +146,8 @@ void DG_SetWindowTitle(const char *title) {}
 
 //
 
+char *argv[] = {"", "-iwad\0", ""};
+
 LUALIB_API int doom_start(lua_State *L)
 {
     if (initialized)
@@ -153,7 +155,7 @@ LUALIB_API int doom_start(lua_State *L)
     initialized = true;
 
     const char *iwad = lua_tostring(L, 1);
-    char *argv[] = {"", "-iwad\0", iwad};
+    argv[2] = iwad;
 
     doomgeneric_Create(3, argv);
     return 0;
