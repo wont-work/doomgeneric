@@ -80,10 +80,7 @@ static void add_key(int pressed, const char *luaKey)
 static uint32_t get_ms()
 {
 #ifdef _WIN32
-    SYSTEMTIME tv;
-    GetSystemTime(&tv);
-
-    return (tv.wSecond * 1000) + tv.wMilliseconds;
+    return GetTickCount();
 #else
     struct timeval tv;
     gettimeofday(&tv, NULL);
@@ -146,7 +143,7 @@ void DG_SetWindowTitle(const char *title) {}
 
 //
 
-char *argv[] = {"", "-iwad\0", ""};
+char *doom_argv[] = {"", "-iwad\0", ""};
 
 LUALIB_API int doom_start(lua_State *L)
 {
@@ -154,10 +151,8 @@ LUALIB_API int doom_start(lua_State *L)
         return 1;
     initialized = true;
 
-    const char *iwad = lua_tostring(L, 1);
-    argv[2] = iwad;
-
-    doomgeneric_Create(3, argv);
+    doom_argv[2] = strdup(lua_tostring(L, 1));
+    doomgeneric_Create(3, doom_argv);
     return 0;
 }
 
