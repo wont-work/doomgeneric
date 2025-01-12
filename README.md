@@ -4,8 +4,8 @@ a lua native module for doomgeneric, allowing doom to be embedded inside games w
 
 example code on the love/ directory. bring your own doom1.wad
 
-requires luajit to compile because im lazy. theres a separate Makefile.mingw for windows cross compilation with the arch linux `mingw-w64-luajit` package.  
-compiling with regular lua should just be a matter of installing lua 5.1 and replacing the include definitions on doomgeneric_lua.c
+compiles on linux (requires luajit but will likely work with lua as well), and windows (visual studio w/ vcpkg).
+mingw should also work too but you may need to adjust the #includes. a likely broken makefile for that exists at Makefile.mingw
 
 original doomgeneric readme follows:
 

@@ -14,8 +14,8 @@ endif
 
 CC=gcc
 LDFLAGS+=-Wl,--gc-sections
-CFLAGS+=-O2 -Wall -shared -fPIC
-LIBS+=-lm -lc -llua
+CFLAGS+=-O2 -Wall -shared -fPIC $(shell pkg-config --cflags luajit)
+LIBS+=-lm -lc $(shell pkg-config --libs luajit)
 
 # subdirectory for objects
 OBJDIR=build

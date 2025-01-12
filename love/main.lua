@@ -13,7 +13,9 @@ function love.load()
     local _, _, w, h = love.window.getSafeArea()
     love.resize(w, h)
 
-    doom.start("doom1.wad")
+    local path = love.filesystem.getSource()
+    print(path)
+    doom.start(path .. "/doom1.wad")
 end
 
 function love.draw()

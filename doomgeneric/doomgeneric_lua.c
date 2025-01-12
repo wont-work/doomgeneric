@@ -2,15 +2,27 @@
 #include <errno.h>
 #include <stdbool.h>
 #include <string.h>
-#include <sys/time.h>
-#include <unistd.h>
+
+#ifdef _WIN32
+	#define WIN32_LEAN_AND_MEAN
+	#define VC_EXTRALEAN
+	#include <Windows.h>
+#else
+	#include <sys/time.h>
+	#include <unistd.h>
+#endif
 
 #include "doomgeneric.h"
 #include "doomkeys.h"
 
 #define LUA_LIB
-#include "luajit-2.1/lua.h"
-#include "luajit-2.1/lauxlib.h"
+#ifdef _WIN32
+	#include <luajit/lua.h>
+	#include <luajit/lauxlib.h>
+#else
+	#include <lua.h>
+	#include <lauxlib.h>
+#endif
 
 uint32_t begin;
 bool want_redraw = false;
@@ -67,11 +79,19 @@ void add_key(int pressed, const char *luaKey)
 
 uint32_t get_ms()
 {
+#ifdef _WIN32
+    SYSTEMTIME tv;
+    GetSystemTime(&tv);
+
+    return (tv.wSecond * 1000) + tv.wMilliseconds;
+#else
     struct timeval tv;
     gettimeofday(&tv, NULL);
 
     return (tv.tv_sec) * 1000 + (tv.tv_usec) / 1000; // convert tv_sec & tv_usec to millisecond
+#endif
 }
+
 
 //
 
@@ -87,7 +107,11 @@ void DG_DrawFrame()
 
 void DG_SleepMs(uint32_t ms)
 {
+#ifdef _WIN32
+    Sleep(ms);
+#else
     usleep(ms * 1000);
+#endif
 }
 
 uint32_t DG_GetTicksMs()
