@@ -27,11 +27,15 @@
 uint32_t begin;
 bool want_redraw = false;
 bool initialized = false;
+char *doom_argv[] = {"", "-iwad\0", ""};
 
-#define KEYQUEUE_SIZE 16
-static unsigned short s_KeyQueue[KEYQUEUE_SIZE];
-static unsigned int s_KeyQueueWriteIndex = 0;
-static unsigned int s_KeyQueueReadIndex = 0;
+#define KEYQUEUE_SIZE 64
+static unsigned short key_queue[KEYQUEUE_SIZE];
+static unsigned int key_queue_write_idx = 0;
+static unsigned int key_queue_read_idx = 0;
+
+lua_State* callback_quit_L;
+int callback_quit = -1;
 
 //
 
@@ -72,9 +76,9 @@ static void add_key(int pressed, const char *luaKey)
     if (key == 0xff)
         return;
 
-    s_KeyQueue[s_KeyQueueWriteIndex] = (pressed << 8) | key;
-    s_KeyQueueWriteIndex++;
-    s_KeyQueueWriteIndex %= KEYQUEUE_SIZE;
+    key_queue[key_queue_write_idx] = (pressed << 8) | key;
+    key_queue_write_idx++;
+    key_queue_write_idx %= KEYQUEUE_SIZE;
 }
 
 static uint32_t get_ms()
@@ -88,7 +92,6 @@ static uint32_t get_ms()
     return (tv.tv_sec) * 1000 + (tv.tv_usec) / 1000;
 #endif
 }
-
 
 //
 
@@ -119,16 +122,16 @@ uint32_t DG_GetTicksMs()
 
 int DG_GetKey(int *pressed, unsigned char *doomKey)
 {
-    if (s_KeyQueueReadIndex == s_KeyQueueWriteIndex)
+    if (key_queue_read_idx == key_queue_write_idx)
     {
         // key queue is empty
         return 0;
     }
     else
     {
-        unsigned short keyData = s_KeyQueue[s_KeyQueueReadIndex];
-        s_KeyQueueReadIndex++;
-        s_KeyQueueReadIndex %= KEYQUEUE_SIZE;
+        unsigned short keyData = key_queue[key_queue_read_idx];
+        key_queue_read_idx++;
+        key_queue_read_idx %= KEYQUEUE_SIZE;
 
         *pressed = keyData >> 8;
         *doomKey = keyData & 0xFF;
@@ -141,9 +144,19 @@ int DG_GetKey(int *pressed, unsigned char *doomKey)
 
 void DG_SetWindowTitle(const char *title) {}
 
-//
+void DG_Quit()
+{
+    if (callback_quit == -1) {
+		printf("DG_Quit: no quit callback registered\n");
+        return;
+    }
 
-char *doom_argv[] = {"", "-iwad\0", ""};
+    printf("DG_Quit\n");
+    lua_rawgeti(callback_quit_L, LUA_REGISTRYINDEX, callback_quit);
+    lua_call(callback_quit_L, 0, 0);
+}
+
+//
 
 LUALIB_API int doom_start(lua_State *L)
 {
@@ -215,6 +228,22 @@ LUALIB_API int doom_release_key(lua_State *L)
     return 0;
 }
 
+LUALIB_API int doom_on_quit(lua_State* L)
+{
+    if (!lua_isfunction(L, 1)) {
+        printf("expected function as arg, got %s\n", lua_typename(L, lua_type(L, 1)));
+        return 0;
+    }
+
+    int callback_ref = luaL_ref(L, LUA_REGISTRYINDEX);
+
+	callback_quit = callback_ref;
+	callback_quit_L = L;
+	printf("registered quit callback for ref %d\n", callback_ref);
+
+    return 0;
+}
+
 static const luaL_Reg doomlib[] = {
     {"start", doom_start},
     {"tick", doom_tick},
@@ -223,7 +252,8 @@ static const luaL_Reg doomlib[] = {
     {"get_height", doom_get_height},
     {"get_want_redraw", doom_get_want_redraw},
     {"press_key", doom_press_key},
-    {"release_key", doom_release_key},
+	{"release_key", doom_release_key},
+    {"on_quit", doom_on_quit},
     {NULL, NULL}};
 
 LUALIB_API int luaopen_doom(lua_State *L)

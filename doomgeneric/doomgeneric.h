@@ -38,4 +38,6 @@ uint32_t DG_GetTicksMs();
 int DG_GetKey(int* pressed, unsigned char* key);
 void DG_SetWindowTitle(const char * title);
 
+void DG_Quit();
+
 #endif //DOOM_GENERIC

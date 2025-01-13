@@ -6,6 +6,10 @@ local doomH = doom.get_height()
 local imageData = love.image.newImageData(doomW, doomH, "rgba8")
 local image = love.graphics.newImage(imageData)
 
+doom.on_quit(function ()
+    love.event.quit()
+end)
+
 function love.load()
     local _, _, w, h = love.window.getSafeArea()
     love.resize(w, h)
