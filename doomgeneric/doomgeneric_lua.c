@@ -34,8 +34,8 @@ static unsigned short key_queue[KEYQUEUE_SIZE];
 static unsigned int key_queue_write_idx = 0;
 static unsigned int key_queue_read_idx = 0;
 
-lua_State* callback_quit_L;
-int callback_quit = -1;
+lua_State* callback_quit_L = NULL;
+int callback_quit = LUA_NOREF;
 
 //
 
@@ -120,7 +120,7 @@ uint32_t DG_GetTicksMs()
     return now - begin;
 }
 
-int DG_GetKey(int *pressed, unsigned char *doomKey)
+int DG_GetKey(int *out_pressed, unsigned char *out_doom_key)
 {
     if (key_queue_read_idx == key_queue_write_idx)
     {
@@ -133,8 +133,8 @@ int DG_GetKey(int *pressed, unsigned char *doomKey)
         key_queue_read_idx++;
         key_queue_read_idx %= KEYQUEUE_SIZE;
 
-        *pressed = keyData >> 8;
-        *doomKey = keyData & 0xFF;
+        *out_pressed = keyData >> 8;
+        *out_doom_key = keyData & 0xFF;
 
         return 1;
     }
@@ -146,7 +146,7 @@ void DG_SetWindowTitle(const char *title) {}
 
 void DG_Quit()
 {
-    if (callback_quit == -1) {
+    if (callback_quit == LUA_NOREF || callback_quit_L == NULL) {
 		printf("DG_Quit: no quit callback registered\n");
         return;
     }
@@ -189,8 +189,8 @@ LUALIB_API int doom_get_height(lua_State *L)
 
 LUALIB_API int doom_get_pixel_at(lua_State *L)
 {
-    int x = lua_tonumber(L, 1);
-    int y = lua_tonumber(L, 2);
+    lua_Integer x = luaL_checkinteger(L, 1);
+    lua_Integer y = luaL_checkinteger(L, 2);
 
     pixel_t packed = DG_ScreenBuffer[(y * DOOMGENERIC_RESX) + x];
     lua_Number b = ( packed        & 0xff) / 255.0;
@@ -214,7 +214,7 @@ LUALIB_API int doom_get_want_redraw(lua_State *L)
 
 LUALIB_API int doom_press_key(lua_State *L)
 {
-    const char *key = lua_tostring(L, 1);
+    const char *key = luaL_checkstring(L, 1);
     add_key(1, key);
 
     return 0;
@@ -222,7 +222,7 @@ LUALIB_API int doom_press_key(lua_State *L)
 
 LUALIB_API int doom_release_key(lua_State *L)
 {
-    const char *key = lua_tostring(L, 1);
+    const char *key = luaL_checkstring(L, 1);
     add_key(0, key);
 
     return 0;
@@ -230,16 +230,14 @@ LUALIB_API int doom_release_key(lua_State *L)
 
 LUALIB_API int doom_on_quit(lua_State* L)
 {
-    if (!lua_isfunction(L, 1)) {
-        printf("expected function as arg, got %s\n", lua_typename(L, lua_type(L, 1)));
-        return 0;
+    luaL_argcheck(L, lua_isfunction(L, 1), 1, "invalid quit callback");
+
+    if (callback_quit != LUA_NOREF && callback_quit_L != NULL) {
+        luaL_unref(callback_quit_L, LUA_REGISTRYINDEX, callback_quit);
     }
 
-    int callback_ref = luaL_ref(L, LUA_REGISTRYINDEX);
-
-	callback_quit = callback_ref;
+	callback_quit = luaL_ref(L, LUA_REGISTRYINDEX);
 	callback_quit_L = L;
-	printf("registered quit callback for ref %d\n", callback_ref);
 
     return 0;
 }

@@ -6,7 +6,7 @@ local doomH = doom.get_height()
 local imageData = love.image.newImageData(doomW, doomH, "rgba8")
 local image = love.graphics.newImage(imageData)
 
-doom.on_quit(function ()
+doom.on_quit(function()
     love.event.quit()
 end)
 
